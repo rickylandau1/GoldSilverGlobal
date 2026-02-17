@@ -69,11 +69,27 @@ function initGraphs() {
     });
 }
 
-function updateCurrency() {
-    setInterval(() => {
-        const rate = (3.73 + Math.random() * 0.01).toFixed(3);
-        document.getElementById('usd-rate').innerText = `${rate} ₪`;
-    }, 5000);
+/* עדכון שער הדולר לפי ה-API של המחשבון */
+async function updateCurrency() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=usd,ils');
+        const data = await response.json();
+
+        if (data['pax-gold']) {
+            const priceUSD = data['pax-gold'].usd;
+            const priceILS = data['pax-gold'].ils;
+            
+            // חישוב היחס בדיוק כמו במחשבון
+            const rate = (priceILS / priceUSD).toFixed(3);
+
+            const rateElement = document.getElementById('usd-rate');
+            if (rateElement) {
+                rateElement.innerText = rate;
+            }
+        }
+    } catch (error) {
+        console.error("שגיאה במשיכת נתונים:", error);
+    }
 }
 
 /* =========================================
@@ -115,4 +131,5 @@ function accessAction(action) {
             b.className = 'theme-dark';
             break;
     }
+
 }
